@@ -11,8 +11,7 @@ rust-version = "1.61"
 [dependencies]
 anyhow = "1.0.55"
 av-metrics-decoders = { version = "0.3.1", features = [
-    "vapoursynth",
-    "y4m",
+    "y4m"
 ], optional = true }
 clap = { version = "4.0.18", features = ["derive"] }
 crossterm = "0.26.1"

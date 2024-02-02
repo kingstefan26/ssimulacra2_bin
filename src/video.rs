@@ -1,4 +1,4 @@
-use av_metrics_decoders::{y4m::new_decoder_from_stdin, Decoder, VapoursynthDecoder};
+use av_metrics_decoders::Decoder;
 use crossterm::tty::IsTty;
 use image::ColorType;
 use indicatif::{HumanDuration, ProgressBar, ProgressDrawTarget, ProgressState, ProgressStyle};
@@ -17,6 +17,7 @@ use std::{
     path::{Path, PathBuf},
     time::{SystemTime, UNIX_EPOCH},
 };
+use av_metrics_decoders::y4m::new_decoder_from_file;
 
 const PROGRESS_CHARS: &str = "█▉▊▋▌▍▎▏  ";
 const INDICATIF_PROGRESS_TEMPLATE: &str = if cfg!(windows) {
@@ -159,90 +160,16 @@ pub fn compare_videos(
     dst_primaries: ColorPrimaries,
     dst_full_range: bool,
 ) {
-    if source == "-" || source == "/dev/stdin" {
-        assert!(
-            !(distorted == "-" || distorted == "/dev/stdin"),
-            "Source and distorted inputs cannot both be from piped input"
-        );
-        let distorted = if Path::new(distorted)
-            .extension()
-            .map(|ext| ext.to_ascii_lowercase().to_string_lossy() == "vpy")
-            .unwrap_or(false)
-        {
-            VapoursynthDecoder::new_from_script(Path::new(distorted)).unwrap()
-        } else {
-            VapoursynthDecoder::new_from_video(Path::new(distorted)).unwrap()
-        };
-        let distorted_frame_count = distorted.get_frame_count().ok();
-        return compare_videos_inner(
-            new_decoder_from_stdin().unwrap(),
-            distorted,
-            None,
-            distorted_frame_count,
-            frame_threads,
-            graph,
-            verbose,
-            src_matrix,
-            src_transfer,
-            src_primaries,
-            src_full_range,
-            dst_matrix,
-            dst_transfer,
-            dst_primaries,
-            dst_full_range,
-        );
-    }
+    assert!(
+        !(source == "-" || source == "/dev/stdin" || distorted == "-" || distorted == "/dev/stdin"),
+        "Source and distorted inputs cannot both be from piped input"
+    );
+    let source = new_decoder_from_file(Path::new(source)).unwrap();
+    let distorted = new_decoder_from_file(Path::new(distorted)).unwrap();
 
-    if distorted == "-" || distorted == "/dev/stdin" {
-        let source = if Path::new(source)
-            .extension()
-            .map(|ext| ext.to_ascii_lowercase().to_string_lossy() == "vpy")
-            .unwrap_or(false)
-        {
-            VapoursynthDecoder::new_from_script(Path::new(source)).unwrap()
-        } else {
-            VapoursynthDecoder::new_from_video(Path::new(source)).unwrap()
-        };
-        let source_frame_count = source.get_frame_count().ok();
-        return compare_videos_inner(
-            source,
-            new_decoder_from_stdin().unwrap(),
-            source_frame_count,
-            None,
-            frame_threads,
-            graph,
-            verbose,
-            src_matrix,
-            src_transfer,
-            src_primaries,
-            src_full_range,
-            dst_matrix,
-            dst_transfer,
-            dst_primaries,
-            dst_full_range,
-        );
-    }
+    let source_frame_count = None;
+    let distorted_frame_count = None;
 
-    let source = if Path::new(source)
-        .extension()
-        .map(|ext| ext.to_ascii_lowercase().to_string_lossy() == "vpy")
-        .unwrap_or(false)
-    {
-        VapoursynthDecoder::new_from_script(Path::new(source)).unwrap()
-    } else {
-        VapoursynthDecoder::new_from_video(Path::new(source)).unwrap()
-    };
-    let distorted = if Path::new(distorted)
-        .extension()
-        .map(|ext| ext.to_ascii_lowercase().to_string_lossy() == "vpy")
-        .unwrap_or(false)
-    {
-        VapoursynthDecoder::new_from_script(Path::new(distorted)).unwrap()
-    } else {
-        VapoursynthDecoder::new_from_video(Path::new(distorted)).unwrap()
-    };
-    let source_frame_count = source.get_frame_count().ok();
-    let distorted_frame_count = distorted.get_frame_count().ok();
     compare_videos_inner(
         source,
         distorted,

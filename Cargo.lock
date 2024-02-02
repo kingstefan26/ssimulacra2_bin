@@ -133,7 +133,6 @@ checksum = "fbaae4589517c7b8b5af8e15971ca31e79c91a377bebd84fce1cdc5e8ae3e4d0"
 dependencies = [
  "anyhow",
  "av-metrics",
- "vapoursynth",
  "y4m",
 ]
 
@@ -1586,28 +1585,6 @@ dependencies = [
  "num-derive",
  "num-traits",
  "rust_hawktracer",
-]
-
-[[package]]
-name = "vapoursynth"
-version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0c7df702c65dec1cfa3b93f824a1e58d5b0fdb82ac8a722596f43d7214282f56"
-dependencies = [
- "anyhow",
- "bitflags",
- "lazy_static",
- "thiserror",
- "vapoursynth-sys",
-]
-
-[[package]]
-name = "vapoursynth-sys"
-version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2fc59bbb7980ce21ece45bc5b3e316bf27ac164b7b1c273ce4846c29d0642a9c"
-dependencies = [
- "cfg-if",
 ]
 
 [[package]]
